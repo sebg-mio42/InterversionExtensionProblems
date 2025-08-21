@@ -1,0 +1,61 @@
+name: Deploy IG to Github Pages
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+env:
+  NPM_CONFIG_AUDIT: false
+  NPM_CONFIG_FUND: false
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  pages-deploy:
+    name: Deploy IG to GitHub Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: ./FSHDesignRules
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: FHIR Cache
+        id: fhir-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.fhir/packages
+          key: fhir-cache-${{ runner.os }}-${{ hashFiles('./FSHDesignRules/package.json', './FSHDesignRules/fhirpkg.lock.json', './.github/workflows/deploy-github-page.yml') }}
+      - name: Install Firely Terminal
+        if: steps.fhir-cache.outputs.cache-hit != 'true'
+        run: dotnet tool install -g Firely.Terminal --version 3.3.2
+      - name: Restore FHIR dependencies
+        if: steps.fhir-cache.outputs.cache-hit != 'true'
+        run: fhir restore
+      - name: Install Jekyll
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.3
+          working-directory: ./FSHDesignRules
+          bundler-cache: true
+      - name: Make Jekyll accessible
+        run: bundler binstubs jekyll
+      - name: Install Sushi
+        run: npm install -g fsh-sushi
+      - name: IG Build
+        run: |
+          source ./_updatePublisher.sh --force --yes
+          source ./_genonce.sh -jekyll "$(realpath ./bin/jekyll)"
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./FSHDesignRules/output
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

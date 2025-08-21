@@ -20,9 +20,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    defaults:
-      run:
-        working-directory: .
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +39,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.3
-          working-directory: .
           bundler-cache: true
       - name: Make Jekyll accessible
         run: bundler binstubs jekyll

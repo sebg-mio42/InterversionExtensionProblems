@@ -1,0 +1,11 @@
+{
+  "name": "kbv.mio.laborbefund",
+  "version": "1.0.0-kommentierung.2",
+  "description": "Medizinisches Informationsobjekt (MIO) Laborbefund V1.0.0 ",
+  "author": "Kassenärztliche Bundesvereinigung (KBV)",
+  "fhirVersions": [
+    "4.0.1"
+  ],
+  "dependencies": {
+  }
+}

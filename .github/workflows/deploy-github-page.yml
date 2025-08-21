@@ -22,7 +22,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     defaults:
       run:
-        working-directory: ./FSHDesignRules
+        working-directory: .
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.fhir/packages
-          key: fhir-cache-${{ runner.os }}-${{ hashFiles('./FSHDesignRules/package.json', './FSHDesignRules/fhirpkg.lock.json', './.github/workflows/deploy-github-page.yml') }}
+          key: fhir-cache-${{ runner.os }}-${{ hashFiles('./package.json', './fhirpkg.lock.json', './.github/workflows/deploy-github-page.yml') }}
       - name: Install Firely Terminal
         if: steps.fhir-cache.outputs.cache-hit != 'true'
         run: dotnet tool install -g Firely.Terminal --version 3.3.2
@@ -42,7 +42,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.3
-          working-directory: ./FSHDesignRules
+          working-directory: .
           bundler-cache: true
       - name: Make Jekyll accessible
         run: bundler binstubs jekyll
@@ -55,7 +55,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./FSHDesignRules/output
+          path: ./output
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
